@@ -1,67 +1,48 @@
-// const fs = require("fs");
-// const http = require("http");
-// const port = 3000;
-
-// const renderHTML = (path, res) => {
-//   fs.readFile(path, (err, data) => {
-//     if (err) {
-//       res.writeHead(404);
-//       res.write("File Not Found");
-//     } else {
-//       res.write(data);
-//     }
-//     res.end();
-//   });
-// };
-
-// http
-//   .createServer((req, res) => {
-//     res.writeHead(200, {
-//       "Content-Type": "text/html"
-//     });
-
-//     const url = req.url;
-
-//     switch (url) {
-//       case "/about":
-//         renderHTML("./about.html", res);
-//         break;
-//       case "/contact":
-//         renderHTML("./contact.html", res);
-//         break;
-//       default:
-//         renderHTML("./index.html", res);
-//         break;
-//     }
-//   })
-//   .listen(port, () => {
-//     console.log(`Server is listening on port ${port}...`);
-//   });
-
 const express = require("express");
+const expressLayouts = require("express-ejs-layouts");
 const app = express();
 const port = 3000;
 
+// gunakan ejs
+app.set("view engine", "ejs");
+app.set("layout", "layouts/main-layout");
+app.use(expressLayouts);
+
 app.get("/", (req, res) => {
-  // res.send("Hello World!");
-  res.sendFile("./index.html", { root: __dirname });
+  const mahasiswa = [
+    {
+      nama: "Ade Pranaya",
+      email: "adepranaya@gmail.com"
+    },
+    {
+      nama: "Hazar Hamzah",
+      email: "hazarhamzah@gmail.com"
+    },
+    {
+      nama: "Muhammad Dwika Ilyas Ruhyat",
+      email: "dwika@gmail.com"
+    }
+  ];
+  res.render("index", {
+    layout: "layouts/main-layout",
+    nama: "Ade Pranaya",
+    title: "Halaman Home",
+    mahasiswa
+  });
 });
 
 app.get("/about", (req, res) => {
-  // res.send("Halaman About!");
-  res.sendFile("./about.html", { root: __dirname });
+  res.render("about");
 });
 
 app.get("/contact", (req, res) => {
-  // res.send("Halaman Contact!");
-  res.sendFile("./contact.html", { root: __dirname });
+  res.render("contact");
 });
 
 app.get("/product/:id", (req, res) => {
   const product = "Product ID : " + req.params.id;
   const category = "Category ID : " + req.query.category;
-  res.send(product +"<br>"+ category);
-  // res.json(req.params);
+  res.send(product + "<br>" + category);
 });
 
 app.use("/", (req, res) => {
