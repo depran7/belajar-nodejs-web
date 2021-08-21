@@ -24,7 +24,6 @@ app.get("/", (req, res) => {
     }
   ];
   res.render("index", {
-    layout: "layouts/main-layout",
     nama: "Ade Pranaya",
     title: "Halaman Home",
     mahasiswa
