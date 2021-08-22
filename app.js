@@ -2,13 +2,35 @@ const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const app = express();
 const port = 3000;
-const { loadContact, findContact } = require("./utils/contacts");
+const {
+  loadContact,
+  findContact,
+  addContact,
+  cekDuplikat
+} = require("./utils/contacts");
+const { body, validationResult, check } = require("express-validator");
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
+const flash = require("connect-flash");
 
 // gunakan ejs
 app.set("view engine", "ejs");
 app.set("layout", "layouts/main-layout");
 app.use(expressLayouts); // Third Party Middleware
 app.use(express.static("public")); // Built-in Middleware
+app.use(express.urlencoded({ extended: true })); // Built-in Middleware
+
+// konfigurasi flash
+app.use(cookieParser("secret"));
+app.use(
+  session({
+    cookie: { maxAge: 6000 },
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true
+  })
+);
+app.use(flash());
 
 app.get("/", (req, res) => {
   const mahasiswa = [
@@ -34,7 +56,7 @@ app.get("/", (req, res) => {
 
 app.get("/about", (req, res) => {
   res.render("about", {
-    title: "Halaman About",
+    title: "Halaman About"
   });
 });
 
@@ -43,14 +65,54 @@ app.get("/contact", (req, res) => {
 
   res.render("contact", {
     title: "Halaman Contact",
-    contacts
+    contacts,
+    msg: req.flash('msg')
   });
 });
 
+// Halaman Form Tambah Data Contact
+app.get("/contact/add", (req, res) => {
+  res.render("add-contact", {
+    title: "Halaman Tambah Contact"
+  });
+});
+// Process Tambah Data Contact
+app.post(
+  "/contact",
+  [
+    body("nama").custom(value => {
+      const duplikat = cekDuplikat(value);
+      if (duplikat) {
+        throw new Error("Nama Contact sudah digunakan!");
+      }
+      return true;
+    }),
+    check("email").isEmail().withMessage("Email tidak valid!"),
+    check("nohp").isMobilePhone("id-ID").withMessage("No HP tidak valid!")
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      // return res.status(400).json({ errors: errors.array() });
+      res.render("add-contact", {
+        title: "Form Tambah Data Contact",
+        errors: errors.array()
+      });
+    } else {
+      addContact(req.body);
+      // kirimkan flash message
+      req.flash('msg', 'Data contact berhasil ditambahkan');
+      res.redirect("/contact");
+    }
+  }
+);
+
+// Halaman Detail Contact
 app.get("/contact/:nama", (req, res) => {
   const contact = findContact(req.params.nama);
 
-  res.render("detail", {
+  res.render("detail-contact", {
     title: "Halaman Detail Contact",
     contact
   });
