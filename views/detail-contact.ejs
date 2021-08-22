@@ -12,7 +12,11 @@
         <h5 class="card-title"><%= contact.nama %></h5>
         <h6 class="card-subtitle mb-2 text-muted"><%= contact.nohp %> </h6>
         <p class="card-text"><%= contact.email %> </p>
-        <a href="/contact" class="card-link">&laquo; Kembali ke daftar contact</a>
+
+        <a href="/contact/edit/<%= contact.nama %>" class="btn btn-info btn-sm">Ubah</a>
+        <a href="/contact/delete/<%= contact.nama %>" class="btn btn-danger btn-sm" onclick="return confirm('Apakah anda yakin untuk menghapus data ini?')">Hapus</a>
+
+        <a href="/contact" class="card-link d-block mt-3">&laquo; Kembali ke daftar contact</a>
       </div>
     </div>
     <% } %>
